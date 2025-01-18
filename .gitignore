@@ -1,0 +1,6 @@
+*dll
+*.o
+*.a
+*.so
+test.*
+*.exe
