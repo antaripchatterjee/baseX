@@ -25,7 +25,7 @@ uchar_t* base32_encode(const char* orgstr) {
             encstr[alloc_size-1] = '\0';
             for(size_t i = 0; i < (arglen+4)/5; i++) {
                 memset(_t2, 0, sizeof(_t2));
-                uint8_t l = ((i+1) * 5 <= arglen ? 5 : (arglen-i*5);
+                uint8_t l = ((i+1) * 5 <= arglen ? 5 : (arglen-i*5));
                 memmove(_t2, orgstr+(i*5*sizeof(uchar_t)), sizeof(uchar_t) * l);
                 _t1[0] = _t2[0] >> 3;
                 _t1[1] = ((_t2[0] & 0b00000111) << 2) | (_t2[1] >> 6);
