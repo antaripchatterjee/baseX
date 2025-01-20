@@ -14,10 +14,10 @@ int main(int argc, const char* argv[]) {
         printf("Original String: %s\n", orgstr);
         uchar_t* encstr = base64_encode(orgstr);
         if(encstr) {
-            printf("Encoded string: %s\n", encstr);
+            printf("BASE64 encoded string: %s\n", encstr);
             char* decstr = base64_decode(encstr);
             if(decstr) {
-                printf("Decoded string: %s\n", decstr);
+                printf("BASE64 decoded string: %s\n", decstr);
                 free(decstr);
             } else {    
                 perror("ERR: base64_decode failed");

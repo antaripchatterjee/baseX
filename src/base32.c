@@ -15,23 +15,27 @@ uchar_t* base32_encode(const char* orgstr) {
     size_t arglen, reslen, k = 0;
     const uchar_t base32_seq[33] = BASE32_SEQ;
     if(orgstr && (arglen = strlen(orgstr))) {
-        reslen = ((arglen + 2) / 3) * 4;
+        reslen = ((arglen + 4) / 5) * 8;
         size_t alloc_size = sizeof(uchar_t) * (reslen + 1);
         encstr = (uchar_t*) malloc(alloc_size);
-        uint8_t _t1[4] = { 0 };
-        uchar_t _t2[4] = { 0 };
+        uint8_t _t1[8] = { 0 };
+        uchar_t _t2[6] = { 0 };
         if(encstr) {
             memset(encstr, '=', alloc_size);
             encstr[alloc_size-1] = '\0';
-            for(size_t i = 0; i < (arglen+2)/3; i++) {
+            for(size_t i = 0; i < (arglen+4)/5; i++) {
                 memset(_t2, 0, sizeof(_t2));
-                uint8_t l = ((i+1) * 3 <= arglen ? 3 : (arglen-i*3));
-                memmove(_t2, orgstr+(i*3*sizeof(uchar_t)), sizeof(uchar_t) * l);
-                _t1[0] = _t2[0] >> 2;
-                _t1[1] = ((_t2[0] & 0b00000011) << 4) | (_t2[1] >> 4);
-                _t1[2] = ((_t2[1] & 0b00001111) << 2) | (_t2[2] >> 6);
-                _t1[3] = _t2[2] & 0b00111111;
-                for(uint8_t j = 0; j < l+1; j++) {
+                uint8_t l = ((i+1) * 5 <= arglen ? 5 : (arglen-i*5);
+                memmove(_t2, orgstr+(i*5*sizeof(uchar_t)), sizeof(uchar_t) * l);
+                _t1[0] = _t2[0] >> 3;
+                _t1[1] = ((_t2[0] & 0b00000111) << 2) | (_t2[1] >> 6);
+                _t1[2] = (_t2[1] & 0b00111111) >> 1;
+                _t1[3] = ((_t2[1] & 0b00000001) << 4) | (_t2[2] >> 4);
+                _t1[4] = ((_t2[2] & 0b00001111) << 1) | (_t2[3] >> 7);
+                _t1[5] = (_t2[3] & 0b01111100) >> 2;
+                _t1[6] = ((_t2[3] & 0b00000011) << 3) | (_t2[4] >> 5);
+                _t1[7] = _t2[4] & 0b00011111;
+                for(uint8_t j = 0; j <= (l == 5 ? 7 : ((l*8)/5)); j++) {
                     encstr[k++] = base32_seq[_t1[j]];
                 }
             }
