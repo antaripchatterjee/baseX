@@ -3,18 +3,17 @@
 #include <stdint.h>
 
 #ifdef MAKEFILECOMPILE
-#include "base64.h"
+#include "base32.h"
 #include "_utils.h"
 #else
-#include "../headers/base64.h"
+#include "../headers/base32.h"
 #include "../headers/_utils.h"
 #endif // MAKEFILECOMPILING
 
-
-uchar_t* base64_encode(const char* orgstr) {
+uchar_t* base32_encode(const char* orgstr) {
     uchar_t* encstr = NULL;
     size_t arglen, reslen, k = 0;
-    const uchar_t base64_seq[65] = BASE64_SEQ;
+    const uchar_t base32_seq[33] = BASE32_SEQ;
     if(orgstr && (arglen = strlen(orgstr))) {
         reslen = ((arglen + 2) / 3) * 4;
         size_t alloc_size = sizeof(uchar_t) * (reslen + 1);
@@ -33,7 +32,7 @@ uchar_t* base64_encode(const char* orgstr) {
                 _t1[2] = ((_t2[1] & 0b00001111) << 2) | (_t2[2] >> 6);
                 _t1[3] = _t2[2] & 0b00111111;
                 for(uint8_t j = 0; j < l+1; j++) {
-                    encstr[k++] = base64_seq[_t1[j]];
+                    encstr[k++] = base32_seq[_t1[j]];
                 }
             }
 
@@ -43,10 +42,10 @@ uchar_t* base64_encode(const char* orgstr) {
 }
 
 
-char* base64_decode(const uchar_t* encstr) {
+char* base32_decode(const uchar_t* encstr) {
     char* decstr = NULL;
     size_t arglen, reslen, k = 0;
-    const uchar_t base64_seq[65] = BASE64_SEQ;
+    const uchar_t base32_seq[33] = BASE32_SEQ;
     if(encstr && (arglen = strlen((const char*)encstr))) {
         reslen = (arglen * 3) / 4;
         if(encstr[arglen-1] == '=') {
@@ -71,11 +70,11 @@ char* base64_decode(const uchar_t* encstr) {
                 memset(_t2, 0, sizeof(_t2));
                 memmove(_t2, encstr + (i*sizeof(_t2)), sizeof(_t2));
                 for(uint8_t j = 0; j < 4; j++) {
-                    _t1[j] = get_index_from_seq(_t2[j], base64_seq, (uint8_t) strlen((const char*) base64_seq));
-                    if((_t1[j] == 64 && j < 2) || _t1[j] == UINT8_MAX) {
+                    _t1[j] = get_index_from_seq(_t2[j], base32_seq, (uint8_t) strlen((const char*) base32_seq));
+                    if((_t1[j] == 32 && j < 2) || _t1[j] == UINT8_MAX) {
                         free(decstr);
                         return NULL;
-                    } else if(_t1[j] == 64) {
+                    } else if(_t1[j] == 32) {
                         l--;
                         _t1[j] = 0;
                     }
