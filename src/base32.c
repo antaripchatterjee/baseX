@@ -81,7 +81,7 @@ char* base32_decode(const uchar_t* encstr) {
                         c++;
                     }
                 }
-                if((c * 5) % 8 >= 5) {
+                if(c < 2 || ((c * 5) % 8) >= 5) {
                     free(decstr);
                     return NULL;
                 } else if(c < 8) {
