@@ -47,6 +47,7 @@ char* base64_decode(const uchar_t* encstr) {
     char* decstr = NULL;
     size_t arglen, reslen, k = 0;
     const uchar_t base64_seq[65] = BASE64_SEQ;
+    uint8_t seq_len = (uint8_t) strlen((const char*) base64_seq;
     if(encstr && (arglen = strlen((const char*)encstr))) {
         reslen = (arglen * 3) / 4;
         if(encstr[arglen-1] == '=') {
@@ -57,7 +58,6 @@ char* base64_decode(const uchar_t* encstr) {
         decstr = (char*) malloc(alloc_size);
         if(decstr) {
             memset(decstr, 0, alloc_size);
-            // printf("%zu\n", reslen);
             uint8_t _t1[4];
             uchar_t _t2[4];
             char _t3[4];
@@ -71,11 +71,11 @@ char* base64_decode(const uchar_t* encstr) {
                 memset(_t2, 0, sizeof(_t2));
                 memmove(_t2, encstr + (i*sizeof(_t2)), sizeof(_t2));
                 for(uint8_t j = 0; j < 4; j++) {
-                    _t1[j] = get_index_from_seq(_t2[j], base64_seq, (uint8_t) strlen((const char*) base64_seq));
-                    if((_t1[j] == 64 && j < 2) || _t1[j] == UINT8_MAX) {
+                    _t1[j] = get_index_from_seq(_t2[j], base64_seq, seq_len));
+                    if((_t1[j] == seq_len && j < 2) || _t1[j] == UINT8_MAX) {
                         free(decstr);
                         return NULL;
-                    } else if(_t1[j] == 64) {
+                    } else if(_t1[j] == seq_len) {
                         l--;
                         _t1[j] = 0;
                     }

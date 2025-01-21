@@ -50,42 +50,48 @@ char* base32_decode(const uchar_t* encstr) {
     char* decstr = NULL;
     size_t arglen, reslen, k = 0;
     const uchar_t base32_seq[33] = BASE32_SEQ;
+    uint8_t seq_len = (uint8_t) strlen((const char*) base32_seq);
     if(encstr && (arglen = strlen((const char*)encstr))) {
-        reslen = (arglen * 3) / 4;
-        if(encstr[arglen-1] == '=') {
-            reslen--;
-            if(encstr[arglen-2] == '=') reslen--;
-        }
+        reslen = (arglen * 5) / 8;
         size_t alloc_size = sizeof(char) * (reslen + 1);
         decstr = (char*) malloc(alloc_size);
         if(decstr) {
             memset(decstr, 0, alloc_size);
-            // printf("%zu\n", reslen);
-            uint8_t _t1[4];
-            uchar_t _t2[4];
-            char _t3[4];
-            uint8_t l = 3;
-            for(size_t i = 0; i < arglen/4; i++) {
-                if(l != 3) {
+            uint8_t _t1[8];
+            uchar_t _t2[8];
+            char _t3[6];
+            uint8_t l = 5;
+            for(size_t i = 0; i < arglen/8; i++) {
+                if(l != 5) {
                     free(decstr);
                     return NULL;
                 }
                 memset(_t3, 0, sizeof(_t3));
                 memset(_t2, 0, sizeof(_t2));
                 memmove(_t2, encstr + (i*sizeof(_t2)), sizeof(_t2));
-                for(uint8_t j = 0; j < 4; j++) {
-                    _t1[j] = get_index_from_seq(_t2[j], base32_seq, (uint8_t) strlen((const char*) base32_seq));
-                    if((_t1[j] == 32 && j < 2) || _t1[j] == UINT8_MAX) {
+                uint8_t c = 0; // base32 valid char count
+                for(uint8_t j = 0; j < sizeof(_t2); j++) {
+                    _t1[j] = get_index_from_seq(_t2[j], base32_seq, seq_len);
+                    if((_t1[j] == seq_len && j < 2) || _t1[j] == UINT8_MAX) {
                         free(decstr);
                         return NULL;
-                    } else if(_t1[j] == 32) {
-                        l--;
+                    } else if(_t1[j] == seq_len) {
                         _t1[j] = 0;
+                    } else {
+                        c++;
                     }
                 }
-                _t3[0] = (_t1[0] << 2) | (_t1[1] >> 4);
-                _t3[1] = (_t1[1] << 4) | (_t1[2] >> 2);
-                _t3[2] = (_t1[2] << 6) | _t1[3];
+                if((c * 5) % 8 >= 5) {
+                    free(decstr);
+                    return NULL;
+                } else if(c < 8) {
+                    l = (c * 5) / 8;
+                }
+                _t3[0] = (_t1[0] << 3) | (_t1[1] >> 2);
+                _t3[1] = (_t1[1] << 6) | (_t1[2] << 1) | (_t1[3] >> 4);
+                _t3[2] = (_t1[3] << 4) | (_t1[4] >> 1);
+                _t3[3] = (_t1[4] << 7) | (_t1[5] << 2) | (_t1[6] >> 3);
+                _t3[4] = (_t1[6] << 5) | _t1[7];
                 for(uint8_t j = 0; j < l; j++) {
                     decstr[k++] = _t3[j];
                 }
